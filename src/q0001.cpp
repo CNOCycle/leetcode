@@ -199,7 +199,6 @@ vector<int> map_func(vector<int>& nums, int &target)
     {
         int comp1 = nums[ii];
         int comp2 = target - comp1;
-        unordered_map<int,VAL>::iterator it;
 
         // if we find two elements
         if (candidate.find(comp2) != candidate.end())
