@@ -29,106 +29,151 @@ return [0, 1].
 #include <utility>
 using namespace std;
 
-void stardard_data(vector<int>& nums, int &target, int &idx1, int &idx2)
+struct Input
 {
-    vector<int> arr{2,7,11,15};
-    nums.swap(arr);
-    target = 9;
-    idx1 = 0;
-    idx2 = 1;
-}
-
-class StandardCase : public ::testing::Test 
-{
-protected:
-    void SetUp() override
-    {
-        stardard_data(input_arr, target, idx1, idx2);
-    }
-
-    vector<int> input_arr;
+    vector<int> nums;
     int target;
     int idx1;
     int idx2;
 };
 
-void random_data(vector<int>& nums, int &target, int &idx1, int &idx2)
+
+class StandardCase : public ::testing::Test 
 {
-    int MIN_VAL = 0;
-    int MAX_VAL = 500000;
-    int MAX_LEN = 100000;
+private:
 
-    // random generator
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(MIN_VAL, MAX_VAL);
-
-    // set target
-    int comp1 = dis(gen);
-    int comp2 = dis(gen);
-    while(comp1 == comp2)
+    Input std_test1()
     {
-        comp1 = dis(gen);
-        comp2 = dis(gen);
-    }
-    target = comp1 + comp2;
+        vector<int> arr{2,7,11,15};
 
-    // generate target vector: nums
-    unordered_map<int, int> forbidden_set;
-    forbidden_set.insert( pair<int, int>(comp1, comp2) );
-    forbidden_set.insert( pair<int, int>(comp2, comp1) );
-    nums.push_back(comp1);
-    nums.push_back(comp2);
-    
-    int ARRAY_LEN = 2;
-    {
-        std::uniform_int_distribution<> dis(2, MAX_LEN);
-        ARRAY_LEN = dis(gen);
-    }
-    
-    while(nums.size() < ARRAY_LEN)
-    {
-        int next_comp1 = dis(gen);
-        int next_comp2 = target - next_comp1;
-        if (forbidden_set.find(next_comp1) == forbidden_set.end() &&
-            forbidden_set.find(next_comp2) == forbidden_set.end())
-        {
-            forbidden_set.insert( pair<int, int>(next_comp1, next_comp2) );
-            forbidden_set.insert( pair<int, int>(next_comp2, next_comp1) );
-            nums.push_back(next_comp1);
-        }
-
+        Input data;
+        data.nums.swap(arr);
+        data.target = 9;
+        data.idx1 = 0;
+        data.idx2 = 1;
+        return data;
     }
 
-    // random suffle
-    std::mt19937 g(rd());
-    std::shuffle(nums.begin(), nums.end(), g);
-
-    // get indices
-    for(int ii = 0; ii < nums.size(); ii = ii + 1)
+    Input std_test2()
     {
-        if (nums[ii] == comp1)
-        {
-            idx1 = ii;
-        }
+        vector<int> arr{3,2,4};
 
-        if (nums[ii] == comp2)
-        {
-            idx2 = ii;
-        }
+        Input data;
+        data.nums.swap(arr);
+        data.target = 6;
+        data.idx1 = 1;
+        data.idx2 = 2;
+        return data;
     }
 
-    if(idx1 > idx2)
+    Input std_test3()
     {
-        int tmp = idx1;
-        idx1 = idx2;
-        idx2 = tmp;
+        vector<int> arr{3,3};
+
+        Input data;
+        data.nums.swap(arr);
+        data.target = 6;
+        data.idx1 = 0;
+        data.idx2 = 1;
+        return data;
     }
 
-}
+protected:
+    void SetUp() override
+    {
+        candidates.push_back(std_test1());
+        candidates.push_back(std_test2());
+        candidates.push_back(std_test3());
+    }
+
+    vector<Input> candidates;
+};
+
 
 class RandomCase : public ::testing::Test 
 {
+private:
+
+    void random_data(vector<int>& nums, int &target, int &idx1, int &idx2)
+    {
+        int MIN_VAL = -1e9;
+        int MAX_VAL = 1e9;
+        int MAX_LEN = 100000;
+
+        // random generator
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(MIN_VAL, MAX_VAL);
+
+        // set target
+        int comp1 = dis(gen);
+        int comp2 = dis(gen);
+        target = comp1 + comp2;
+        while(target < -1e9 || 1e9 < target )
+        {
+            comp1 = dis(gen);
+            comp2 = dis(gen);
+            target = comp1 + comp2;
+        }
+        
+        // generate target vector: nums
+        unordered_map<int, int> forbidden_set;
+        forbidden_set.insert( pair<int, int>(comp1, comp2) );
+        forbidden_set.insert( pair<int, int>(comp2, comp1) );
+        nums.push_back(comp1);
+        nums.push_back(comp2);
+        
+        int ARRAY_LEN = 2;
+        {
+            std::uniform_int_distribution<> dis(2, MAX_LEN);
+            ARRAY_LEN = dis(gen);
+        }
+        
+        while(nums.size() < ARRAY_LEN)
+        {
+            int next_comp1 = dis(gen);
+            int next_comp2 = target - next_comp1;
+            if(next_comp2 < -1e9 || 1e9 < next_comp2)
+            {
+                continue;
+            }
+            if (forbidden_set.find(next_comp1) == forbidden_set.end() &&
+                forbidden_set.find(next_comp2) == forbidden_set.end())
+            {
+                forbidden_set.insert( pair<int, int>(next_comp1, next_comp2) );
+                forbidden_set.insert( pair<int, int>(next_comp2, next_comp1) );
+                nums.push_back(next_comp1);
+            }
+
+        }
+
+        // random suffle
+        std::mt19937 g(rd());
+        std::shuffle(nums.begin(), nums.end(), g);
+
+        // get indices
+        for(int ii = 0; ii < nums.size(); ii = ii + 1)
+        {
+            if (nums[ii] == comp1)
+            {
+                idx1 = ii;
+            }
+
+            if (nums[ii] == comp2)
+            {
+                idx2 = ii;
+            }
+        }
+
+        if(idx1 > idx2)
+        {
+            int tmp = idx1;
+            idx1 = idx2;
+            idx2 = tmp;
+        }
+
+    }
+
 protected:
     void SetUp() override
     {
@@ -167,10 +212,15 @@ vector<int> baseline_func(vector<int>& nums, int &target)
 
 TEST_F(StandardCase, baseline_func)
 {
-    vector<int> result;
-    result = baseline_func(input_arr, target);
-    EXPECT_EQ (result[0], idx1);
-    EXPECT_EQ (result[1], idx2);
+    for(int ii = 0; ii < candidates.size(); ii = ii + 1)
+    {
+        Input input = candidates[ii];
+        vector<int> result;
+        result = baseline_func(input.nums, input.target);
+        EXPECT_EQ (result[0], input.idx1);
+        EXPECT_EQ (result[1], input.idx2);
+    }
+
 }
 
 TEST_F(RandomCase, baseline_func)
@@ -229,12 +279,18 @@ vector<int> map_func(vector<int>& nums, int &target)
     return ans;
 };
 
+
 TEST_F(StandardCase, map_func)
 {
-    vector<int> result;
-    result = map_func(input_arr, target);
-    EXPECT_EQ (result[0], idx1);
-    EXPECT_EQ (result[1], idx2);
+    for(int ii = 0; ii < candidates.size(); ii = ii + 1)
+    {
+        Input input = candidates[ii];
+        vector<int> result;
+        result = map_func(input.nums, input.target);
+        EXPECT_EQ (result[0], input.idx1);
+        EXPECT_EQ (result[1], input.idx2);
+    }
+
 }
 
 TEST_F(RandomCase, map_func)
