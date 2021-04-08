@@ -121,6 +121,67 @@ bool compare_ans(ListNode* ref, ListNode* pred)
 #include <utility>
 using namespace std;
 
+struct Input
+{
+    ListNode* l1;
+    ListNode* l2;
+    ListNode* ans;
+};
+
+class StandardCase : public ::testing::Test
+{
+private:
+
+    Input std_test1()
+    {
+        std::vector<int> vec_l1{2,4,3};
+        std::vector<int> vec_l2{5,6,4};
+        std::vector<int> vec_ref{7,0,8};
+
+        Input data;
+        data.l1 = vec_to_node(vec_l1);
+        data.l2 = vec_to_node(vec_l2);
+        data.ans = vec_to_node(vec_ref);
+        return data;
+    }
+
+    Input std_test2()
+    {
+        std::vector<int> vec_l1{0};
+        std::vector<int> vec_l2{0};
+        std::vector<int> vec_ref{0};
+
+        Input data;
+        data.l1 = vec_to_node(vec_l1);
+        data.l2 = vec_to_node(vec_l2);
+        data.ans = vec_to_node(vec_ref);
+        return data;
+    }
+
+    Input std_test3()
+    {
+        std::vector<int> vec_l1{9,9,9,9,9,9,9};
+        std::vector<int> vec_l2{9,9,9,9};
+        std::vector<int> vec_ref{8,9,9,9,0,0,0,1};
+
+        Input data;
+        data.l1 = vec_to_node(vec_l1);
+        data.l2 = vec_to_node(vec_l2);
+        data.ans = vec_to_node(vec_ref);
+        return data;
+    }
+
+protected:
+    void SetUp() override
+    {
+        candidates.push_back(std_test1());
+        candidates.push_back(std_test2());
+        candidates.push_back(std_test3());
+    }
+
+    vector<Input> candidates;
+};
+
 // \TODO: random case
 
 
@@ -208,65 +269,21 @@ public:
     }
 };
 
-TEST(StandardCase, Case1)
+TEST_F(StandardCase, basic_func)
 {
-    std::vector<int> vec_l1{2,4,3};
-    std::vector<int> vec_l2{5,6,4};
-    std::vector<int> vec_ref{7,0,8};
-
-    ListNode* l1 = vec_to_node(vec_l1);
-    ListNode* l2 = vec_to_node(vec_l2);
-    ListNode* ref = vec_to_node(vec_ref);
-
     Solution Solution;
-    ListNode* ans = Solution.addTwoNumbers(l1, l2);
-    bool flag_failed = compare_ans(ref, ans);
-    EXPECT_EQ(flag_failed, false);
+    for(int ii = 0; ii < candidates.size(); ii = ii + 1)
+    {
+        Input input = candidates[ii];
+        vector<int> result;
+        ListNode* ans = Solution.addTwoNumbers(input.l1, input.l2);
+        bool flag_failed = compare_ans(input.ans, ans);
+        EXPECT_EQ(flag_failed, false);
 
-    l1 = delete_node(l1);
-    l2 = delete_node(l2);
-    ref = delete_node(ref);
-    ans = delete_node(ans);
-}
+        input.l1 = delete_node(input.l1);
+        input.l2 = delete_node(input.l2);
+        input.ans = delete_node(input.ans);
+        ans = delete_node(ans);
+    }
 
-TEST(StandardCase, Case2)
-{
-    std::vector<int> vec_l1{0};
-    std::vector<int> vec_l2{0};
-    std::vector<int> vec_ref{0};
-
-    ListNode* l1 = vec_to_node(vec_l1);
-    ListNode* l2 = vec_to_node(vec_l2);
-    ListNode* ref = vec_to_node(vec_ref);
-
-    Solution Solution;
-    ListNode* ans = Solution.addTwoNumbers(l1, l2);
-    bool flag_failed = compare_ans(ref, ans);
-    EXPECT_EQ(flag_failed, false);
-
-    l1 = delete_node(l1);
-    l2 = delete_node(l2);
-    ref = delete_node(ref);
-    ans = delete_node(ans);
-}
-
-TEST(StandardCase, Case3)
-{
-    std::vector<int> vec_l1{9,9,9,9,9,9,9};
-    std::vector<int> vec_l2{9,9,9,9};
-    std::vector<int> vec_ref{8,9,9,9,0,0,0,1};
-
-    ListNode* l1 = vec_to_node(vec_l1);
-    ListNode* l2 = vec_to_node(vec_l2);
-    ListNode* ref = vec_to_node(vec_ref);
-
-    Solution Solution;
-    ListNode* ans = Solution.addTwoNumbers(l1, l2);
-    bool flag_failed = compare_ans(ref, ans);
-    EXPECT_EQ(flag_failed, false);
-
-    l1 = delete_node(l1);
-    l2 = delete_node(l2);
-    ref = delete_node(ref);
-    ans = delete_node(ans);
 }
