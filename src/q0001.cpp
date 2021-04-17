@@ -38,7 +38,7 @@ struct Input
 };
 
 
-class StandardCase : public ::testing::Test 
+class StandardCase : public ::testing::Test
 {
 private:
 
