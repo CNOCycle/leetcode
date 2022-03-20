@@ -21,6 +21,7 @@ return [0, 1].
 /*************************************************
   This section is code for preparing testing data.
 ***************************************************/
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <random>
@@ -45,36 +46,21 @@ private:
     Input std_test1()
     {
         vector<int> arr{2,7,11,15};
-
-        Input data;
-        data.nums.swap(arr);
-        data.target = 9;
-        data.idx1 = 0;
-        data.idx2 = 1;
+        Input data = {arr, 9, 0, 1};
         return data;
     }
 
     Input std_test2()
     {
         vector<int> arr{3,2,4};
-
-        Input data;
-        data.nums.swap(arr);
-        data.target = 6;
-        data.idx1 = 1;
-        data.idx2 = 2;
+        Input data = {arr, 6, 1, 2};
         return data;
     }
 
     Input std_test3()
     {
         vector<int> arr{3,3};
-
-        Input data;
-        data.nums.swap(arr);
-        data.target = 6;
-        data.idx1 = 0;
-        data.idx2 = 1;
+        Input data = {arr, 6, 0, 1};
         return data;
     }
 
@@ -192,15 +178,15 @@ protected:
 ***************************************************/
 vector<int> baseline_func(vector<int>& nums, int &target)
 {
-    vector<int> ans;
+    vector<int> ans(2);
     for(int ii = 0; ii < nums.size(); ii = ii + 1)
     {
         for(int jj = ii + 1; jj < nums.size(); jj = jj + 1)
         {
             if (nums[ii] + nums[jj] == target)
             {
-                ans.push_back(ii);
-                ans.push_back(jj);
+                ans[0] = ii;
+                ans[1] = jj;
                 break;
             }
         }
@@ -234,17 +220,12 @@ TEST_F(RandomCase, baseline_func)
 /*************************************************
   This section is implemnetion of leetcode
 ***************************************************/
-
-struct VAL
-{
-    int idx;
-    int val;
-};
-
 vector<int> map_func(vector<int>& nums, int &target)
 {
-    vector<int> ans;
-    unordered_map<int,VAL> candidate;
+    vector<int> ans(2);
+    // the first element is val,
+    // the second element is idx
+    unordered_map<int, int> candidate;
     for(int ii = 0; ii < nums.size(); ii = ii + 1)
     {
         int comp1 = nums[ii];
@@ -253,25 +234,23 @@ vector<int> map_func(vector<int>& nums, int &target)
         // if we find two elements
         if (candidate.find(comp2) != candidate.end())
         {
-            VAL data = candidate[comp2];
             int idx1 = ii;
-            int idx2 = data.idx;
+            int idx2 = candidate[comp2];
             if(idx1 > idx2)
             {
-                int tmp = idx1;
-                idx1 = idx2;
-                idx2 = tmp;
-                ans.push_back(idx1);
-                ans.push_back(idx2);
-                break;
+                ans[0] = idx2;
+                ans[1] = idx1;
             }
+            else
+            {
+                ans[0] = idx1;
+                ans[1] = idx2;
+            }
+            break;
         }
         else // otherwise, insert candidate
         {
-            VAL data;
-            data.idx = ii;
-            data.val = comp1;
-            candidate.insert( pair<int, VAL>(data.val, data) );
+            candidate.insert( pair<int, int>(comp1, ii) );
         }
         
     }
